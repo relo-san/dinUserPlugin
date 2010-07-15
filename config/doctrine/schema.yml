@@ -1,0 +1,469 @@
+
+# This file is part of the dinUserPlugin package.
+# (c) DineCat, 2010 http://dinecat.com/
+#
+# For the full copyright and license information, please view the LICENSE file,
+# that was distributed with this package, or see http://www.dinecat.com/din/license.html
+
+# Plugin schema file for Doctrine
+#
+# @package     dinUserPlugin
+# @subpackage  config.doctrine
+# @author      Nicolay N. Zyk <relo.san@gmail.com>
+
+#DinUserGroup
+DinUserGroup:
+
+    actAs:
+        I18n:
+            fields:         ['title', 'uri', 'description']
+            unique:         ['uri']
+
+    columns:
+        id:                 { type: 'integer(4)', primary: true, autoincrement: true }
+        name:               { type: 'string(50)', fixed: true }
+        is_active:          { type: 'boolean', notnull: true, default: true }
+        title:              { type: 'string(150)', fixed: true }
+        uri:                { type: 'string(50)', fixed: true }
+        description:        { type: 'clob(65532)' }
+
+    indexes:
+        uri:                { fields: ['uri'], type: 'unique' }
+
+    relations:
+        DinUsers:
+            class:          'DinUser'
+            refClass:       'DinUserBindGroup'
+            local:          'group_id'
+            foreign:        'user_id'
+            alias:          'Users'
+            foreignAlias:   'Groups'
+
+
+#DinUser
+DinUser:
+
+    columns:
+        id:                 { type: 'integer(4)', primary: true, autoincrement: true }
+        nickname:           { type: 'string(50)', fixed: true, notnull: true }
+        passhashe:          { type: 'string(32)', fixed: true, notnull: true }
+        salt:               { type: 'string(8)', fixed: true, notnull: true }
+        email:              { type: 'string(150)', fixed: true, notnull: true }
+        created_at:         { type: 'timestamp', notnull: true }
+        state:              { type: 'integer(1)', notnull: true, default: '1' }
+        culture:            { type: 'string(2)', fixed: true }
+
+    indexes:
+        nickname:           { fields: ['nickname'], type: 'unique' }
+        email:              { fields: ['email'], type: 'unique' }
+
+    relations:
+        DinUserGroups:
+            class:          'DinUser'
+            refClass:       'DinUserBindGroup'
+            local:          'user_id'
+            foreign:        'group_id'
+            alias:          'Groups'
+            foreignAlias:   'Users'
+
+
+#DinUserBindGroup
+DinUserBindGroup:
+
+    columns:
+        user_id:            { type: 'integer(4)', primary: true }
+        group_id:           { type: 'integer(4)', primary: true }
+        created_at:         { type: 'timestamp', notnull: true }
+        creator_id:         { type: 'integer(4)' }
+
+    relations:
+        DinUser:
+            class:          'DinUser'
+            local:          'user_id'
+            foreign:        'id'
+            alias:          'User'
+            foreignAlias:   'GroupBindUsers'
+            onDelete:       'CASCADE'
+        DinUserGroup:
+            local:          'group_id'
+            foreign:        'id'
+            alias:          'Group'
+            foreignAlias:   'GroupBindUsers'
+            onDelete:       'CASCADE'
+        DinUser:
+            class:          'DinUser'
+            local:          'creator_id'
+            foreign:        'id'
+            alias:          'Creator'
+            foreignAlias:   'GroupBindUsers'
+            onDelete:       'SET NULL'
+
+
+#DinUserInfo
+DinUserInfo:
+
+    columns:
+        user_id:            { type: 'integer(4)', primary: true }
+        firstname:          { type: 'string(50)', fixed: true }
+        lastname:           { type: 'string(50)', fixed: true }
+        patronymic:         { type: 'string(70)', fixed: true }
+        birhdate:           { type: 'date' }
+        sex:                { type: 'integer(1)' }
+
+    relations:
+        DinUser:
+            local:          'user_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'one'
+            alias:          'User'
+            foreignAlias:   'Info'
+            owningSide:     true
+            onDelete:       'CASCADE'
+
+
+#DinUserNotificationType
+DinUserNotificationType:
+
+    actAs:
+        I18n:
+            fields:         ['title', 'uri', 'template', 'description']
+            unique:         ['uri']
+
+    columns:
+        id:                 { type: 'integer(4)', primary: true, autoincrement: true }
+        is_enabled:         { type: 'boolean', notnull: true, default: true }
+        is_multiple:        { type: 'boolean', notnull: true, default: true }
+        title:              { type: 'string(150)', fixed: true }
+        uri:                { type: 'string(50)', fixed: true }
+        template:           { type: 'string(255)' }
+        rules:              { type: 'clob(65532)' }
+        description:        { type: 'clob(65532)' }
+        sequence:           { type: 'integer(4)' }
+
+    indexes:
+        is_enabled:         { fields: ['is_enabled'] }
+        uri:                { fields: ['uri'], type: 'unique' }
+
+
+#DinUserNotification
+DinUserNotification:
+
+    columns:
+        id:                 { type: 'integer(5)', primary: true, autoincrement: true }
+        creator_id:         { type: 'integer(4)' }
+        user_id:            { type: 'integer(4)' }
+        type_id:            { type: 'integer(4)', notnull: true }
+        status:             { type: 'integer(1)', notnull: true, default: '1' }
+        created_at:         { type: 'timestamp', notnull: true }
+        read_at:            { type: 'timestamp' }
+        text:               { type: 'string(255)' }
+
+    relations:
+        DinNotificator:
+            class:          'DinUser'
+            local:          'creator_id'
+            foreign:        'id'
+            alias:          'Notificator'
+            foreignAlias:   'CreatedNotifications'
+            onDelete:       'SET NULL'
+        DinUserNotificationType:
+            local:          'type_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'many'
+            alias:          'Type'
+            foreignAlias:   'Notifications'
+            onDelete:       'CASCADE'
+        DinNotified:
+            class:          'DinUser'
+            local:          'user_id'
+            foreign:        'id'
+            alias:          'Notified'
+            foreignAlias:   'Notifications'
+            onDelete:       'SET NULL'
+
+
+#DinUserContactType
+DinUserContactType:
+
+    actAs:
+        I18n:
+            fields:         ['title', 'uri', 'description']
+            unique:         ['uri']
+
+    columns:
+        id:                 { type: 'integer(4)', primary: true, autoincrement: true }
+        is_enabled:         { type: 'boolean', notnull: true, default: true }
+        title:              { type: 'string(150)', fixed: true }
+        uri:                { type: 'string(50)', fixed: true }
+        description:        { type: 'clob(65532)' }
+        sequence:           { type: 'integer(4)' }
+
+    indexes:
+        enabled:            { fields: ['is_enabled'] }
+        uri:                { fields: ['uri'], type: 'unique' }
+
+
+#DinUserContact
+DinUserContact:
+
+    columns:
+        id:                 { type: 'integer(4)', primary: true, autoincrement: true }
+        user_id:            { type: 'integer(4)', notnull: true }
+        type_id:            { type: 'integer(4)', notnull: true }
+        is_public:          { type: 'boolean', notnull: true, default: true }
+        access_type:        { type: 'integer(1)', notnull: true, default: '0' }
+        status:             { type: 'integer(1)', notnull: true, default: '1' }
+        value:              { type: 'string(255)', notnull: true }
+
+    indexes:
+        public:             { fields: ['user_id', 'is_public'] }
+
+    relations:
+        DinUser:
+            local:          'user_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'many'
+            alias:          'User'
+            foreignAlias:   'Contacts'
+            onDelete:       'CASCADE'
+        DinUserContactType:
+            local:          'type_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'many'
+            alias:          'Type'
+            foreignAlias:   'Contacts'
+            onDelete:       'CASCADE'
+
+
+#DinUserHashe
+DinUserHashe:
+
+    columns:
+        id:                 { type: 'integer(4)', primary: true, autoincrement: true }
+        user_id:            { type: 'integer(4)', notnull: true }
+        destination_type:   { type: 'integer(4)', notnull: true }
+        destination_id:     { type: 'integer(4)' }
+        ukey:               { type: 'string(36)', fixed: true, notnull: true }
+        created_at:         { type: 'timestamp', notnull: true }
+
+    indexes:
+        ukey:               { fields: ['ukey'], type: 'unique' }
+
+    relations:
+        DinUser:
+            local:          'user_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'many'
+            alias:          'User'
+            foreignAlias:   'Hashes'
+            onDelete:       'CASCADE'
+
+
+#DinUserTask
+DinUserTask:
+
+    columns:
+        id:                 { type: 'integer(4)', primary: true, autoincrement: true }
+        hashe_id:           { type: 'integer(4)', notnull: true }
+        type_id:            { type: 'integer(2)', notnull: true }
+        created_at:         { type: 'timestamp', notnull: true }
+        value:              { type: 'clob(65532)' }
+
+    relations:
+        DinUserHashe:
+            local:          'hashe_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'many'
+            alias:          'Hashe'
+            foreignAlias:   'Tasks'
+            onDelete:       'CASCADE'
+
+
+#DinUserFeedbackType
+DinUserFeedbackType:
+
+    actAs:
+        I18n:
+            fields:         ['title', 'description']
+
+    columns:
+        id:                 { type: 'integer(4)', primary: true, autoincrement: true }
+        is_enabled:         { type: 'boolean', notnull: true, default: true }
+        title:              { type: 'string(150)', fixed: true }
+        description:        { type: 'clob(65532)' }
+        sequence:           { type: 'integer(4)' }
+
+    indexes:
+        enabled:            { fields: ['is_enabled'] }
+
+
+#DinUserFeedback
+DinUserFeedback:
+
+    columns:
+        id:                 { type: 'integer(4)', primary: true, autoincrement: true }
+        user_id:            { type: 'integer(4)' }
+        type_id:            { type: 'integer(4)' }
+        email:              { type: 'string(150)', fixed: true }
+        firstname:          { type: 'string(50)', fixed: true }
+        created_at:         { type: 'timestamp', notnull: true }
+        state:              { type: 'integer(1)', notnull: true, default: '0' }
+        subject:            { type: 'string(255)' }
+        message:            { type: 'clob(65532)' }
+        answer:             { type: 'clob(65532)' }
+
+    relations:
+        DinUser:
+            local:          'user_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'many'
+            alias:          'User'
+            foreignAlias:   'Feedbacks'
+            onDelete:       'CASCADE'
+        DinUserFeedbackType:
+            local:          'type_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'many'
+            alias:          'Type'
+            foreignAlias:   'Feedbacks'
+            onDelete:       'SET NULL'
+
+
+#DinUserPm
+DinUserPm:
+
+    columns:
+        id:                 { type: 'integer(5)', primary: true, autoincrement: true }
+        sender_id:          { type: 'integer(4)' }
+        recipient_id:       { type: 'integer(4)' }
+        parent_id:          { type: 'integer(5)' }
+        status:             { type: 'integer(1)', notnull: true, default: '1' }
+        created_at:         { type: 'timestamp', notnull: true }
+        read_at:            { type: 'timestamp' }
+
+    relations:
+        DinSender:
+            class:          'DinUser'
+            local:          'sender_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'many'
+            alias:          'Sender'
+            foreignAlias:   'PMSenders'
+            onDelete:       'SET NULL'
+        DinRecipient:
+            class:          'DinUser'
+            local:          'recipient_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'many'
+            alias:          'Recipient'
+            foreignAlias:   'PMRecipients'
+            onDelete:       'SET NULL'
+        DinUserPm:
+            class:          'DinUserPm'
+            local:          'parent_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'one'
+            alias:          'Parent'
+            foreignAlias:   'Child'
+            onDelete:       'SET NULL'
+
+
+#DinUserPmContent
+DinUserPmContent:
+
+    columns:
+        id:                 { type: 'integer(5)', primary: true }
+        subject:            { type: 'string(255)' }
+        body:               { type: 'clob' }
+        attach:             { type: 'clob' }
+
+    relations:
+        DinUserPm:
+            local:          'id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'one'
+            alias:          'Head'
+            foreignAlias:   'Content'
+            owningSide:     true
+            onDelete:       'CASCADE'
+
+
+#DinUserOnline
+DinUserOnline:
+
+    columns:
+        user_id:            { type: 'integer(4)', primary: true }
+        last_online:        { type: 'timestamp' }
+
+    relations:
+        DinUser:
+            local:          'user_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'one'
+            alias:          'User'
+            foreignAlias:   'Online'
+            owningSide:     true
+            onDelete:       'CASCADE'
+
+
+#DinUserBookmark
+DinUserBookmark:
+
+    columns:
+        id:                 { type: 'integer(5)', primary: true, autoincrement: true }
+        user_id:            { type: 'integer(4)', notnull: true }
+        type_id:            { type: 'integer(2)', notnull: true }
+        object_id:          { type: 'integer(5)', notnull: true }
+        created_at:         { type: 'timestamp', notnull: true }
+        params:             { type: 'string(200)' }
+        note:               { type: 'clob(65532)' }
+
+    indexes:
+        bookmark:           { fields: ['user_id', 'type_id', 'object_id'], type: 'unique' }
+
+    relations:
+        DinUser:
+            local:          'user_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'many'
+            alias:          'User'
+            foreignAlias:   'Bookmarks'
+            onDelete:       'CASCADE'
+
+
+#DinUserSecurityLog
+DinUserSecurityLog:
+
+    columns:
+        id:                 { type: 'integer(5)', primary: true, autoincrement: true }
+        user_id:            { type: 'integer(4)' }
+        type_id:            { type: 'integer(2)', notnull: true }
+        created_at:         { type: 'timestamp', notnull: true }
+        ip:                 { type: 'integer(4)' }
+        info:               { type: 'clob(65532)' }
+
+    relations:
+        DinUser:
+            local:          'user_id'
+            foreign:        'id'
+            type:           'one'
+            foreignType:    'many'
+            alias:          'User'
+            foreignAlias:   'Log'
+            onDelete:       'SET NULL'
+
+#EOF
