@@ -1,0 +1,98 @@
+
+# This file is part of the dinUserPlugin package.
+# (c) DineCat, 2010 http://dinecat.com/
+#
+# For the full copyright and license information, please view the LICENSE file,
+# that was distributed with this package, or see http://www.dinecat.com/din/license.html
+
+# dinUserPlugin routing configuration
+#
+# @package     dinUserPlugin
+# @subpackage  config
+# @author      Nicolay N. Zyk <relo.san@gmail.com>
+
+din_user_admin:
+    class:                      'sfDoctrineRouteCollection'
+    options:
+        model:                  'DinUser'
+        module:                 'dinUserAdmin'
+        prefix_path:            '/adm/user'
+        column:                 'id'
+        with_wildcard_routes:   true
+        collection_actions:
+            acpl:               ['get']
+
+din_user_group_admin:
+    class:                      'sfDoctrineRouteCollection'
+    options:
+        model:                  'DinUserGroup'
+        module:                 'dinUserGroupAdmin'
+        prefix_path:            '/adm/user/group'
+        column:                 'id'
+        with_wildcard_routes:   true
+
+din_user_feedback_admin:
+    class:                      'sfDoctrineRouteCollection'
+    options:
+        model:                  'DinUserFeedback'
+        module:                 'dinUserFeedbackAdmin'
+        prefix_path:            '/adm/user/feedback'
+        column:                 'id'
+        with_wildcard_routes:   true
+
+din_user_notify_admin:
+    class:                      'sfDoctrineRouteCollection'
+    options:
+        model:                  'DinUserNotification'
+        module:                 'dinUserNotifyAdmin'
+        prefix_path:            '/adm/user/notify'
+        column:                 'id'
+        with_wildcard_routes:   true
+
+din_user_notify_type_admin:
+    class:                      'sfDoctrineRouteCollection'
+    options:
+        model:                  'DinUserNotificationType'
+        module:                 'dinUserNotifyTypeAdmin'
+        prefix_path:            '/adm/user/notify/type'
+        column:                 'id'
+        with_wildcard_routes:   true
+
+din_user_pm_admin:
+    class:                      'sfDoctrineRouteCollection'
+    options:
+        actions:                ['edit', 'list', 'new', 'create', 'delete']
+        model:                  'DinUserPm'
+        module:                 'dinUserPmAdmin'
+        prefix_path:            '/adm/user/pm'
+        column:                 'id'
+        with_wildcard_routes:   true
+        with_show:              true
+        model_methods:
+            object:             'getMessageForRoute'
+        collection_actions:
+            outbox:             ['get']
+        object_actions:
+            showInboxMessage:   ['get']
+            showOutboxMessage:  ['get']
+            deleteOutbox:       ['get']
+
+din_user_online_mon:
+    class:                      'sfDoctrineRouteCollection'
+    options:
+        model:                  'DinUserOnline'
+        module:                 'dinUserOnlineMon'
+        prefix_path:            '/mon/user/online'
+        column:                 'id'
+        with_wildcard_routes:   true
+
+din_user_security_log_mon:
+    class:                      'sfDoctrineRouteCollection'
+    options:
+        model:                  'DinUserSecurityLog'
+        module:                 'dinUserSecurityLogMon'
+        prefix_path:            '/mon/user/log'
+        column:                 'id'
+        with_wildcard_routes:   true
+
+#EOF

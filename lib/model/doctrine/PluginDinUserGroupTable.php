@@ -30,6 +30,37 @@ class PluginDinUserGroupTable extends dinDoctrineTable
 
     } // PluginDinUserGroupTable::getInstance()
 
+
+    /**
+     * Get groups by titles
+     * 
+     * @param   array   $titles Titles array
+     * @return  array   DinUserGroup
+     */
+    public function getGroupsByTitles( $titles )
+    {
+
+        return $this->createQuery( 'g' )->whereIn( 'g.name', $titles )->execute();
+
+    } // PluginDinUserGroupTable::getGroupsByTitles()
+
+
+    /**
+     * Get choices query
+     * 
+     * @param   array   $params Query parameters [optional]
+     * @return  Doctrine_Query
+     */
+    public function getChoicesQuery( $params = array() )
+    {
+
+        $q = $this->createQuery();
+        $this->addQuery( $q )->joinI18n()->addSelect( array( 'id', 'title' ) )
+            ->addWhere( 'is_active', true )->addOrderBy( array( 'title' ) )->free();
+        return $q;
+
+    } // PluginDinUserGroupTable::getChoicesQuery()
+
 } // PluginDinUserGroupTable
 
 //EOF

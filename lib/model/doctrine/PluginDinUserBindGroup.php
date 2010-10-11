@@ -17,6 +17,27 @@
  */
 abstract class PluginDinUserBindGroup extends BaseDinUserBindGroup
 {
+
+    /**
+     * Pre insert
+     * 
+     * @param   Doctrine_Event  $event
+     * @return  void
+     */
+    public function preInsert( $event )
+    {
+
+        if ( !$this->getCreatedAt() )
+        {
+            $this->setCreatedAt( date( 'Y-m-d H:i:s', time() ) );
+        }
+        if ( !$this->getCreatorId() )
+        {
+            $this->setCreatorId( sfContext::getInstance()->getUser()->getUserId() );
+        }
+
+    } // PluginDinUserBindGroup::preInsert()
+
 } // PluginDinUserBindGroup
 
 //EOF

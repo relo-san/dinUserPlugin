@@ -17,6 +17,32 @@
  */
 abstract class PluginDinUserHashe extends BaseDinUserHashe
 {
+
+    /**
+     * Generate and set hashe key
+     * 
+     * @return  void
+     */
+    public function generateUkey()
+    {
+
+        return $this->_set( 'ukey', md5( microtime() ) );
+
+    } // PluginDinUserHashe::generateUkey()
+
+
+    /**
+     * Get uri for hashe
+     * 
+     * @return  string  Uri hashe
+     */
+    public function getUriHashe()
+    {
+
+        return $this->getUserId() . '-' . $this->getDestinationType() . '-' . $this->getUkey();
+
+    } // PluginDinUserHashe::getUriHashe()
+
 } // PluginDinUserHashe
 
 //EOF

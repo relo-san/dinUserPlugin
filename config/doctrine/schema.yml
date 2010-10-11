@@ -16,28 +16,18 @@ DinUserGroup:
 
     actAs:
         I18n:
-            fields:         ['title', 'uri', 'description']
+            fields:         ['title', 'description']
             unique:         ['uri']
 
     columns:
         id:                 { type: 'integer(4)', primary: true, autoincrement: true }
-        name:               { type: 'string(50)', fixed: true }
+        name:               { type: 'string(50)' }
         is_active:          { type: 'boolean', notnull: true, default: true }
-        title:              { type: 'string(150)', fixed: true }
-        uri:                { type: 'string(50)', fixed: true }
+        title:              { type: 'string(150)' }
         description:        { type: 'clob(65532)' }
 
     indexes:
-        uri:                { fields: ['uri'], type: 'unique' }
-
-    relations:
-        DinUsers:
-            class:          'DinUser'
-            refClass:       'DinUserBindGroup'
-            local:          'group_id'
-            foreign:        'user_id'
-            alias:          'Users'
-            foreignAlias:   'Groups'
+        name:               { fields: ['name'], type: 'unique' }
 
 
 #DinUser
@@ -45,13 +35,13 @@ DinUser:
 
     columns:
         id:                 { type: 'integer(4)', primary: true, autoincrement: true }
-        nickname:           { type: 'string(50)', fixed: true, notnull: true }
-        passhashe:          { type: 'string(32)', fixed: true, notnull: true }
-        salt:               { type: 'string(8)', fixed: true, notnull: true }
-        email:              { type: 'string(150)', fixed: true, notnull: true }
+        nickname:           { type: 'string(50)', notnull: true }
+        passhashe:          { type: 'string(32)', notnull: true }
+        salt:               { type: 'string(8)', notnull: true }
+        email:              { type: 'string(150)', notnull: true }
         created_at:         { type: 'timestamp', notnull: true }
-        state:              { type: 'integer(1)', notnull: true, default: '1' }
-        culture:            { type: 'string(2)', fixed: true }
+        state_id:           { type: 'integer(1)', notnull: true, default: '1' }
+        culture:            { type: 'string(2)', notnull: true }
 
     indexes:
         nickname:           { fields: ['nickname'], type: 'unique' }
@@ -59,7 +49,7 @@ DinUser:
 
     relations:
         DinUserGroups:
-            class:          'DinUser'
+            class:          'DinUserGroup'
             refClass:       'DinUserBindGroup'
             local:          'user_id'
             foreign:        'group_id'
@@ -90,12 +80,12 @@ DinUserBindGroup:
             alias:          'Group'
             foreignAlias:   'GroupBindUsers'
             onDelete:       'CASCADE'
-        DinUser:
+        DinCreator:
             class:          'DinUser'
             local:          'creator_id'
             foreign:        'id'
             alias:          'Creator'
-            foreignAlias:   'GroupBindUsers'
+            foreignAlias:   'GroupBindCreators'
             onDelete:       'SET NULL'
 
 
@@ -104,11 +94,11 @@ DinUserInfo:
 
     columns:
         user_id:            { type: 'integer(4)', primary: true }
-        firstname:          { type: 'string(50)', fixed: true }
-        lastname:           { type: 'string(50)', fixed: true }
-        patronymic:         { type: 'string(70)', fixed: true }
+        firstname:          { type: 'string(50)' }
+        lastname:           { type: 'string(50)' }
+        patronymic:         { type: 'string(70)' }
         birhdate:           { type: 'date' }
-        sex:                { type: 'integer(1)' }
+        sex_id:             { type: 'integer(1)' }
 
     relations:
         DinUser:
@@ -134,8 +124,8 @@ DinUserNotificationType:
         id:                 { type: 'integer(4)', primary: true, autoincrement: true }
         is_enabled:         { type: 'boolean', notnull: true, default: true }
         is_multiple:        { type: 'boolean', notnull: true, default: true }
-        title:              { type: 'string(150)', fixed: true }
-        uri:                { type: 'string(50)', fixed: true }
+        title:              { type: 'string(150)' }
+        uri:                { type: 'string(50)' }
         template:           { type: 'string(255)' }
         rules:              { type: 'clob(65532)' }
         description:        { type: 'clob(65532)' }
@@ -154,7 +144,7 @@ DinUserNotification:
         creator_id:         { type: 'integer(4)' }
         user_id:            { type: 'integer(4)' }
         type_id:            { type: 'integer(4)', notnull: true }
-        status:             { type: 'integer(1)', notnull: true, default: '1' }
+        state_id:           { type: 'integer(1)', notnull: true, default: '1' }
         created_at:         { type: 'timestamp', notnull: true }
         read_at:            { type: 'timestamp' }
         text:               { type: 'string(255)' }
@@ -181,7 +171,7 @@ DinUserNotification:
             foreign:        'id'
             alias:          'Notified'
             foreignAlias:   'Notifications'
-            onDelete:       'SET NULL'
+            onDelete:       'CASCADE'
 
 
 #DinUserContactType
@@ -195,8 +185,8 @@ DinUserContactType:
     columns:
         id:                 { type: 'integer(4)', primary: true, autoincrement: true }
         is_enabled:         { type: 'boolean', notnull: true, default: true }
-        title:              { type: 'string(150)', fixed: true }
-        uri:                { type: 'string(50)', fixed: true }
+        title:              { type: 'string(150)' }
+        uri:                { type: 'string(50)' }
         description:        { type: 'clob(65532)' }
         sequence:           { type: 'integer(4)' }
 
@@ -214,7 +204,7 @@ DinUserContact:
         type_id:            { type: 'integer(4)', notnull: true }
         is_public:          { type: 'boolean', notnull: true, default: true }
         access_type:        { type: 'integer(1)', notnull: true, default: '0' }
-        status:             { type: 'integer(1)', notnull: true, default: '1' }
+        state_id:           { type: 'integer(1)', notnull: true, default: '1' }
         value:              { type: 'string(255)', notnull: true }
 
     indexes:
@@ -247,7 +237,7 @@ DinUserHashe:
         user_id:            { type: 'integer(4)', notnull: true }
         destination_type:   { type: 'integer(4)', notnull: true }
         destination_id:     { type: 'integer(4)' }
-        ukey:               { type: 'string(36)', fixed: true, notnull: true }
+        ukey:               { type: 'string(36)', notnull: true }
         created_at:         { type: 'timestamp', notnull: true }
 
     indexes:
@@ -295,7 +285,7 @@ DinUserFeedbackType:
     columns:
         id:                 { type: 'integer(4)', primary: true, autoincrement: true }
         is_enabled:         { type: 'boolean', notnull: true, default: true }
-        title:              { type: 'string(150)', fixed: true }
+        title:              { type: 'string(150)' }
         description:        { type: 'clob(65532)' }
         sequence:           { type: 'integer(4)' }
 
@@ -310,10 +300,10 @@ DinUserFeedback:
         id:                 { type: 'integer(4)', primary: true, autoincrement: true }
         user_id:            { type: 'integer(4)' }
         type_id:            { type: 'integer(4)' }
-        email:              { type: 'string(150)', fixed: true }
-        firstname:          { type: 'string(50)', fixed: true }
+        email:              { type: 'string(150)' }
+        firstname:          { type: 'string(50)' }
         created_at:         { type: 'timestamp', notnull: true }
-        state:              { type: 'integer(1)', notnull: true, default: '0' }
+        state_id:           { type: 'integer(1)', notnull: true, default: '0' }
         subject:            { type: 'string(255)' }
         message:            { type: 'clob(65532)' }
         answer:             { type: 'clob(65532)' }
@@ -345,7 +335,7 @@ DinUserPm:
         sender_id:          { type: 'integer(4)' }
         recipient_id:       { type: 'integer(4)' }
         parent_id:          { type: 'integer(5)' }
-        status:             { type: 'integer(1)', notnull: true, default: '1' }
+        state_id:           { type: 'integer(1)', notnull: true, default: '1' }
         created_at:         { type: 'timestamp', notnull: true }
         read_at:            { type: 'timestamp' }
 
@@ -429,7 +419,7 @@ DinUserBookmark:
         object_id:          { type: 'integer(5)', notnull: true }
         created_at:         { type: 'timestamp', notnull: true }
         params:             { type: 'string(200)' }
-        note:               { type: 'clob(65532)' }
+        note:               { type: 'string(250)' }
 
     indexes:
         bookmark:           { fields: ['user_id', 'type_id', 'object_id'], type: 'unique' }
